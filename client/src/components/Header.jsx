@@ -1,9 +1,11 @@
 import React from 'react';
-import { Menu, Plus, Bell, Sparkles } from 'lucide-react';
+import { Menu, Plus, Sparkles, Sun, Moon } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 const Header = ({ onOpenMobileMenu, onOpenAddTask, title, subtitle }) => {
   const { user } = useAuth();
+  const { theme, toggleTheme } = useTheme();
 
   // Dynamic greeting based on current local hour
   const getGreeting = () => {
@@ -41,7 +43,26 @@ const Header = ({ onOpenMobileMenu, onOpenAddTask, title, subtitle }) => {
       </div>
 
       {/* Action Buttons */}
-      <div className="flex items-center space-x-3">
+      <div className="flex items-center space-x-2 sm:space-x-3">
+
+        {/* Top-Right Light/Dark Mode Switcher */}
+        <button
+          type="button"
+          onClick={toggleTheme}
+          title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+          aria-label={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+          className="p-2 sm:px-3 sm:py-2 text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white bg-slate-100 hover:bg-slate-200/80 dark:bg-slate-800 dark:hover:bg-slate-700/80 rounded-xl border border-slate-200/80 dark:border-slate-700 transition-all active:scale-95 flex items-center space-x-2 group cursor-pointer"
+        >
+          {theme === 'dark' ? (
+            <Sun className="w-4 h-4 text-amber-400 group-hover:rotate-45 transition-transform" />
+          ) : (
+            <Moon className="w-4 h-4 text-brand-600 group-hover:rotate-12 transition-transform" />
+          )}
+          <span className="hidden md:inline text-xs font-semibold">
+            {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+          </span>
+        </button>
+
         <button
           type="button"
           onClick={onOpenAddTask}

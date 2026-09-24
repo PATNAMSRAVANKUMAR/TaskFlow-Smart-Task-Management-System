@@ -25,7 +25,7 @@ const Login = ({ onSwitchToRegister }) => {
 
     setIsLoading(true);
     try {
-      await login(email, password);
+      await login(email.trim(), password);
       showToast('Welcome back to TaskFlow!', 'success');
     } catch (err) {
       setError(err.response?.data?.message || 'Invalid email or password');

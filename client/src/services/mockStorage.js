@@ -3,7 +3,8 @@ const STORAGE_KEYS = {
   USER: 'taskflow_user',
   TOKEN: 'taskflow_token',
   TASKS: 'taskflow_tasks_store',
-  CATEGORIES: 'taskflow_categories_store'
+  CATEGORIES: 'taskflow_categories_store',
+  REGISTERED_USERS: 'taskflow_registered_users'
 };
 
 const DEFAULT_CATEGORIES = [
@@ -151,27 +152,67 @@ export const mockStorage = {
     return { success: true, data: demoUser };
   },
 
-  login: async ({ email }) => {
-    const user = {
+  login: async ({ email, password }) => {
+    const normalizedEmail = (email || '').toLowerCase().trim();
+    let users = [];
+    try {
+      users = JSON.parse(localStorage.getItem(STORAGE_KEYS.REGISTERED_USERS) || '[]');
+    } catch (e) {
+      users = [];
+    }
+
+    const found = users.find((u) => u.email === normalizedEmail);
+
+    if (found) {
+      if (found.password && password && found.password !== password) {
+        const err = new Error('Invalid email or password');
+        err.response = { status: 401, data: { success: false, message: 'Invalid email or password' } };
+        throw err;
+      }
+      return { success: true, data: found };
+    }
+
+    // Default registered mock user
+    const newUser = {
       _id: 'usr_' + Date.now(),
-      name: email.split('@')[0],
-      email,
+      name: normalizedEmail.split('@')[0],
+      email: normalizedEmail,
+      password: password || '123456',
       createdAt: new Date().toISOString(),
       token: 'mock_jwt_token_' + Date.now()
     };
-    return { success: true, data: user };
+    users.push(newUser);
+    localStorage.setItem(STORAGE_KEYS.REGISTERED_USERS, JSON.stringify(users));
+    return { success: true, data: newUser };
   },
 
-  register: async ({ name, email }) => {
-    const user = {
-      _id: 'usr_' + Date.now(),
-      name,
-      email,
+  register: async ({ name, email, password }) => {
+    const normalizedEmail = (email || '').toLowerCase().trim();
+    let users = [];
+    try {
+      users = JSON.parse(localStorage.getItem(STORAGE_KEYS.REGISTERED_USERS) || '[]');
+    } catch (e) {
+      users = [];
+    }
+
+    const existingIdx = users.findIndex((u) => u.email === normalizedEmail);
+    const newUser = {
+      _id: existingIdx >= 0 ? users[existingIdx]._id : 'usr_' + Date.now(),
+      name: name || normalizedEmail.split('@')[0],
+      email: normalizedEmail,
+      password: password || '123456',
       createdAt: new Date().toISOString(),
       token: 'mock_jwt_token_' + Date.now()
     };
+
+    if (existingIdx >= 0) {
+      users[existingIdx] = newUser;
+    } else {
+      users.push(newUser);
+    }
+    localStorage.setItem(STORAGE_KEYS.REGISTERED_USERS, JSON.stringify(users));
     initMockStorage();
-    return { success: true, data: user };
+    return { success: true, data: newUser };
   },
 
   getMe: async () => {

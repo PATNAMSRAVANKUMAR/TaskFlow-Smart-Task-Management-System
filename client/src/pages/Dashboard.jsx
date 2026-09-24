@@ -1,12 +1,11 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   CheckSquare,
   CheckCircle2,
   Clock,
   AlertTriangle,
-  Plus,
   ArrowRight,
-  Sparkles,
+  ArrowDown,
   Calendar
 } from 'lucide-react';
 import { useTasks } from '../context/TaskContext';
@@ -14,32 +13,10 @@ import StatsCard from '../components/StatsCard';
 import ProgressBar from '../components/ProgressBar';
 import TaskCard from '../components/TaskCard';
 import EmptyState from '../components/EmptyState';
+import { scrollDown } from '../utils/scrollHelper';
 
 const Dashboard = ({ onOpenAddTask, onEditTask, onDeleteTask, onNavigateToTasks }) => {
-  const { tasks, stats, toggleComplete, createTask } = useTasks();
-  const [quickTitle, setQuickTitle] = useState('');
-  const [isQuickSubmitting, setIsQuickSubmitting] = useState(false);
-
-  // Quick Add task handler
-  const handleQuickAdd = async (e) => {
-    e.preventDefault();
-    if (!quickTitle.trim()) return;
-    setIsQuickSubmitting(true);
-    try {
-      await createTask({
-        title: quickTitle.trim(),
-        priority: 'Medium',
-        category: 'Work',
-        status: 'Pending',
-        dueDate: new Date().toISOString()
-      });
-      setQuickTitle('');
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setIsQuickSubmitting(false);
-    }
-  };
+  const { tasks, stats, toggleComplete } = useTasks();
 
   // Filter tasks due today or urgent
   const today = new Date();
@@ -94,55 +71,19 @@ const Dashboard = ({ onOpenAddTask, onEditTask, onDeleteTask, onNavigateToTasks 
         />
       </div>
 
-      {/* Progress & Quick Add Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
-        <div className="lg:col-span-2">
-          <ProgressBar
-            completed={stats.completedTasks}
-            total={stats.totalTasks}
-            percentage={stats.progressPercentage}
-            completedToday={stats.completedToday}
-            completedThisWeek={stats.completedThisWeek}
-          />
-        </div>
-
-        {/* Quick Add Card */}
-        <div className="bg-gradient-to-br from-brand-600 via-indigo-600 to-indigo-700 text-white rounded-2xl p-6 shadow-md shadow-brand-500/10 flex flex-col justify-between">
-          <div>
-            <div className="flex items-center space-x-2 text-indigo-100 mb-1">
-              <Sparkles className="w-4 h-4" />
-              <span className="text-xs font-bold uppercase tracking-wider">Smart Capture</span>
-            </div>
-            <h3 className="text-lg font-bold">Quick Add Task</h3>
-            <p className="text-xs text-indigo-100/90 mt-1 leading-relaxed">
-              Capture a thought instantly. We'll set it for today with medium priority.
-            </p>
-          </div>
-
-          <form onSubmit={handleQuickAdd} className="mt-5">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="What do you need to get done?"
-                value={quickTitle}
-                onChange={(e) => setQuickTitle(e.target.value)}
-                disabled={isQuickSubmitting}
-                className="w-full pl-3.5 pr-10 py-2.5 rounded-xl bg-white/10 placeholder-indigo-200 text-white text-sm border border-white/20 focus:outline-none focus:ring-2 focus:ring-white/40 focus:bg-white/20 transition-all"
-              />
-              <button
-                type="submit"
-                disabled={isQuickSubmitting || !quickTitle.trim()}
-                className="absolute right-1.5 top-1.5 p-1.5 bg-white text-brand-600 hover:bg-brand-50 disabled:opacity-40 rounded-lg transition-colors shadow-sm"
-              >
-                <Plus className="w-4 h-4 stroke-[3]" />
-              </button>
-            </div>
-          </form>
-        </div>
+      {/* Overall Progress Section */}
+      <div>
+        <ProgressBar
+          completed={stats.completedTasks}
+          total={stats.totalTasks}
+          percentage={stats.progressPercentage}
+          completedToday={stats.completedToday}
+          completedThisWeek={stats.completedThisWeek}
+        />
       </div>
 
       {/* Today's Tasks Section */}
-      <div className="space-y-4">
+      <div id="tasks-section" className="space-y-4 scroll-mt-24">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2.5">
             <div className="p-2 rounded-xl bg-brand-50 dark:bg-brand-950/60 text-brand-600 dark:text-brand-400">
@@ -160,13 +101,25 @@ const Dashboard = ({ onOpenAddTask, onEditTask, onDeleteTask, onNavigateToTasks 
             </div>
           </div>
 
-          <button
-            onClick={() => onNavigateToTasks()}
-            className="inline-flex items-center space-x-1.5 text-xs font-semibold text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 transition-colors"
-          >
-            <span>View all</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
+          <div className="flex items-center space-x-3">
+            <button
+              type="button"
+              onClick={() => scrollDown()}
+              title="Scroll down to view tasks (Down by Down)"
+              className="hidden sm:inline-flex items-center space-x-1 text-xs font-semibold text-slate-500 hover:text-brand-600 dark:text-slate-400 dark:hover:text-brand-400 transition-colors cursor-pointer"
+            >
+              <ArrowDown className="w-3.5 h-3.5" />
+              <span>Scroll down</span>
+            </button>
+
+            <button
+              onClick={() => onNavigateToTasks()}
+              className="inline-flex items-center space-x-1.5 text-xs font-semibold text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 transition-colors"
+            >
+              <span>View all</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
 
         {todayTasks.length > 0 ? (

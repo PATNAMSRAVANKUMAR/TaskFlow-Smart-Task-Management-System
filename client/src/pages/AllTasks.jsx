@@ -6,11 +6,13 @@ import {
   LayoutGrid,
   List,
   X,
-  Filter
+  Filter,
+  ArrowDown
 } from 'lucide-react';
 import { useTasks } from '../context/TaskContext';
 import TaskCard from '../components/TaskCard';
 import EmptyState from '../components/EmptyState';
+import { scrollDown, scrollToBottom } from '../utils/scrollHelper';
 
 const AllTasks = ({ onOpenAddTask, onEditTask, onDeleteTask }) => {
   const { tasks, categories, toggleComplete, loadingTasks } = useTasks();
@@ -236,23 +238,48 @@ const AllTasks = ({ onOpenAddTask, onEditTask, onDeleteTask }) => {
         </div>
       </div>
 
-      {/* Task Count Summary */}
+      {/* Task Count Summary & Scroll Option */}
       <div className="flex items-center justify-between px-1">
         <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
           Showing {filteredTasks.length} of {tasks.length} task{tasks.length === 1 ? '' : 's'}
         </p>
+
+        {filteredTasks.length > 2 && (
+          <div className="flex items-center space-x-2">
+            <button
+              type="button"
+              onClick={() => scrollDown()}
+              title="Scroll down through tasks (Down by Down)"
+              className="inline-flex items-center space-x-1 px-2.5 py-1 text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 rounded-lg shadow-sm hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-all active:scale-95 cursor-pointer"
+            >
+              <ArrowDown className="w-3 h-3 text-brand-500" />
+              <span>View down</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => scrollToBottom()}
+              title="Scroll to bottom of task list"
+              className="hidden sm:inline-flex items-center space-x-1 px-2 py-1 text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors cursor-pointer"
+            >
+              <span>To bottom &darr;</span>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Task Cards Grid / List */}
-      {filteredTasks.length > 0 ? (
-        <div
-          className={
-            viewMode === 'grid'
+      <div
+        id="all-tasks-list"
+        className={`scroll-mt-24 ${
+          filteredTasks.length > 0
+            ? viewMode === 'grid'
               ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'
               : 'space-y-3'
-          }
-        >
-          {filteredTasks.map((task) => (
+            : ''
+        }`}
+      >
+        {filteredTasks.length > 0 ? (
+          filteredTasks.map((task) => (
             <TaskCard
               key={task._id}
               task={task}
@@ -260,20 +287,20 @@ const AllTasks = ({ onOpenAddTask, onEditTask, onDeleteTask }) => {
               onEdit={onEditTask}
               onDelete={onDeleteTask}
             />
-          ))}
-        </div>
-      ) : (
-        <EmptyState
-          title={hasActiveFilters ? 'No tasks match your filters' : 'No tasks created yet'}
-          description={
-            hasActiveFilters
-              ? 'Try adjusting your search criteria or resetting filters to see your tasks.'
-              : 'Add your first task to start organizing your workflow efficiently.'
-          }
-          actionText={hasActiveFilters ? 'Clear Filters' : '+ Add New Task'}
-          onAction={hasActiveFilters ? resetFilters : onOpenAddTask}
-        />
-      )}
+          ))
+        ) : (
+          <EmptyState
+            title={hasActiveFilters ? 'No tasks match your filters' : 'No tasks created yet'}
+            description={
+              hasActiveFilters
+                ? 'Try adjusting your search criteria or resetting filters to see your tasks.'
+                : 'Add your first task to start organizing your workflow efficiently.'
+            }
+            actionText={hasActiveFilters ? 'Clear Filters' : '+ Add New Task'}
+            onAction={hasActiveFilters ? resetFilters : onOpenAddTask}
+          />
+        )}
+      </div>
     </div>
   );
 };

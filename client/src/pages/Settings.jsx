@@ -18,7 +18,7 @@ import { authService } from '../services/api';
 
 const Settings = () => {
   const { user, updateProfile } = useAuth();
-  const { theme, toggleTheme } = useTheme();
+  const { theme, toggleTheme, setTheme } = useTheme();
   const { showToast } = useToast();
 
   // Profile Edit State
@@ -174,7 +174,7 @@ const Settings = () => {
 
         <div className="flex flex-col sm:flex-row items-center gap-4 max-w-lg">
           <div
-            onClick={toggleTheme}
+            onClick={() => setTheme('light')}
             className={`flex-1 w-full p-4 rounded-2xl border-2 cursor-pointer transition-all ${
               theme === 'light'
                 ? 'border-brand-600 bg-brand-50/30'
@@ -191,7 +191,7 @@ const Settings = () => {
           </div>
 
           <div
-            onClick={toggleTheme}
+            onClick={() => setTheme('dark')}
             className={`flex-1 w-full p-4 rounded-2xl border-2 cursor-pointer transition-all ${
               theme === 'dark'
                 ? 'border-brand-600 bg-brand-950/30'

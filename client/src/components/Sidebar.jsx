@@ -8,18 +8,14 @@ import {
   FolderKanban,
   Settings,
   LogOut,
-  Moon,
-  Sun,
   X,
   Sparkles
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { useTheme } from '../context/ThemeContext';
 import { useTasks } from '../context/TaskContext';
 
 const Sidebar = ({ activePage, setActivePage, isMobileOpen, setIsMobileOpen }) => {
   const { user, logout } = useAuth();
-  const { theme, toggleTheme } = useTheme();
   const { stats } = useTasks();
 
   const navItems = [
@@ -133,22 +129,8 @@ const Sidebar = ({ activePage, setActivePage, isMobileOpen, setIsMobileOpen }) =
           })}
         </div>
 
-        {/* Bottom Section: Theme Toggle, User Profile & Logout */}
-        <div className="p-4 border-t border-slate-100 dark:border-slate-800 space-y-3">
-          {/* Theme Toggle Pill */}
-          <div className="flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/60">
-            <span className="text-xs font-medium text-slate-600 dark:text-slate-400 flex items-center space-x-2 pl-2">
-              {theme === 'dark' ? <Moon className="w-4 h-4 text-brand-400" /> : <Sun className="w-4 h-4 text-amber-500" />}
-              <span>{theme === 'dark' ? 'Dark Mode' : 'Light Mode'}</span>
-            </span>
-            <button
-              onClick={toggleTheme}
-              className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 shadow-sm border border-slate-200 dark:border-slate-600 hover:bg-slate-50 transition-all"
-            >
-              Toggle
-            </button>
-          </div>
-
+        {/* Bottom Section: User Profile & Logout */}
+        <div className="p-4 border-t border-slate-100 dark:border-slate-800">
           {/* User Profile Info Card */}
           <div className="flex items-center justify-between p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors">
             <div className="flex items-center space-x-3 min-w-0">

@@ -6,6 +6,8 @@ import Header from './components/Header';
 import TaskModal from './components/TaskModal';
 import CategoryModal from './components/CategoryModal';
 import ConfirmModal from './components/ConfirmModal';
+import ScrollNavigator from './components/ScrollNavigator';
+import AiAssistant from './components/AiAssistant';
 
 import Dashboard from './pages/Dashboard';
 import AllTasks from './pages/AllTasks';
@@ -148,7 +150,7 @@ function App() {
         />
 
         {/* Dynamic Page Router */}
-        <main className="flex-1 px-4 sm:px-8 py-8 max-w-7xl w-full mx-auto">
+        <main className="flex-1 px-4 sm:px-8 pt-6 pb-36 max-w-7xl w-full mx-auto min-h-[calc(100vh-80px)]">
           {activePage === 'dashboard' && (
             <Dashboard
               onOpenAddTask={handleOpenAddTask}
@@ -220,6 +222,12 @@ function App() {
         message={confirmModal.message}
         confirmText={confirmModal.confirmText}
       />
+
+      {/* Global Scroll Navigator (View Down by Down, Top, Bottom, Auto-Scroll) */}
+      <ScrollNavigator />
+
+      {/* AI Assistant (Matching Screenshots: Floating Trigger Pill & Chat Window) */}
+      <AiAssistant />
     </div>
   );
 }

@@ -47,14 +47,15 @@ const registerUser = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Password must be at least 6 characters' });
     }
 
-    const userExists = await User.findOne({ email: email.toLowerCase() });
+    const normalizedEmail = (email || '').trim().toLowerCase();
+    const userExists = await User.findOne({ email: normalizedEmail });
     if (userExists) {
       return res.status(400).json({ success: false, message: 'An account with this email already exists' });
     }
 
     const user = await User.create({
-      name,
-      email: email.toLowerCase(),
+      name: name.trim(),
+      email: normalizedEmail,
       password
     });
 
@@ -89,7 +90,8 @@ const loginUser = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Please provide email and password' });
     }
 
-    const user = await User.findOne({ email: email.toLowerCase() }).select('+password');
+    const normalizedEmail = (email || '').trim().toLowerCase();
+    const user = await User.findOne({ email: normalizedEmail }).select('+password');
     if (!user) {
       return res.status(401).json({ success: false, message: 'Invalid email or password' });
     }

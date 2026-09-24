@@ -52,9 +52,9 @@ const withFallback = async (apiCall, mockCall) => {
   try {
     return await apiCall();
   } catch (err) {
-    // If backend is offline or static 404 from GitHub Pages, seamlessly fallback
-    if (!err.response || err.response.status === 404 || err.code === 'ERR_NETWORK') {
-      console.warn('API unreachable, operating in offline/demo mode:', err.message);
+    // If backend is offline, static 404 from GitHub Pages, or 500/502/504 proxy failure, seamlessly fallback
+    if (!err.response || err.response.status === 404 || err.response.status >= 500 || err.code === 'ERR_NETWORK' || err.message?.includes('Network Error')) {
+      console.warn('API unreachable or failed, operating with local fallback:', err.message);
       const res = await mockCall();
       return { data: res };
     }
@@ -66,12 +66,40 @@ const withFallback = async (apiCall, mockCall) => {
 export const authService = {
   register: (data) =>
     withFallback(
-      () => api.post('/auth/register', data),
+      async () => {
+        const res = await api.post('/auth/register', data);
+        try {
+          await mockStorage.register(data);
+        } catch (e) {}
+        return res;
+      },
       () => mockStorage.register(data)
     ),
   login: (data) =>
     withFallback(
-      () => api.post('/auth/login', data),
+      async () => {
+        try {
+          const res = await api.post('/auth/login', data);
+          try {
+            await mockStorage.register({
+              name: res.data?.data?.name || data.email.split('@')[0],
+              email: data.email,
+              password: data.password
+            });
+          } catch (e) {}
+          return res;
+        } catch (err) {
+          if (err.response && err.response.status === 401) {
+            try {
+              const mockRes = await mockStorage.login(data);
+              if (mockRes && mockRes.success) {
+                return { data: mockRes };
+              }
+            } catch (mockErr) {}
+          }
+          throw err;
+        }
+      },
       () => mockStorage.login(data)
     ),
   demoLogin: () =>
